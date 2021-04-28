@@ -1,65 +1,71 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import Link from 'next/link';
+import { Button, Table} from 'semantic-ui-react';
+import {ItemsContainer, ItemsHeader} from './index.styles'
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
-export default function Home() {
+const Index = () => {
+
+    const [products, setProducts] = useState();
+    const [stockEvents, setStockEvents] = useState();
+
+
+    useEffect(() => {
+        axios({
+            "method": "GET",
+            "url": "http://localhost:1337/products"
+        })
+        .then((response) => {
+            setProducts(response.data)
+        })
+
+        axios({
+            "method": "GET",
+            "url": "http://localhost:1337/stockevents"
+        })
+        .then((response) => {
+            setStockEvents(response.data)
+        })
+    }, []);
+
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    <ItemsContainer>
+      <ItemsHeader>Warehouse Inventory</ItemsHeader>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
+        <Table celled>
+            <Table.Header>
+            <Table.Row>
+                <Table.HeaderCell>Product</Table.HeaderCell>
+                <Table.HeaderCell>Total</Table.HeaderCell>
+                <Table.HeaderCell>Action</Table.HeaderCell>
+            </Table.Row>
+            </Table.Header>
+  
+      {products ? products.map(item => {
+          return (
+                    <Table.Body>
+                    <Table.Row>
+                        <Table.Cell>
+                            <Link href={`/${item.id}`}>
+                                <a>{item.name}</a>
+                            </Link>
+                        </Table.Cell>
+                        <Table.Cell>{item.qty}</Table.Cell>
+                        <Table.Cell collapsing textAlign='right'>
+                            <Link href={`/${item.id}`}>
+                                <Button primary>View</Button>
+                            </Link>
+                            <Link href={`/${item.id}/edit`}>
+                                <Button color="orange">Edit</Button>
+                            </Link>
+                        </Table.Cell>
+                    </Table.Row>
+                    </Table.Body>
+          )
+      }): "no"}
+        </Table>
+    </ItemsContainer>
   )
 }
+
+export default Index;
